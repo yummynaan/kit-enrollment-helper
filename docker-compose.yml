@@ -4,6 +4,8 @@ services:
     build: ./docker/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
     ports:
       - "3308:3306"
     networks:
