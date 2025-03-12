@@ -12,7 +12,7 @@ sql-migrate/install:
 	sql-migrate --version
 
 golang-migrate/install:
-	@if [ ! -x "$(command -v migrate)" ]; then\
+	@if [ ! -x "$(MIGRATE)" ]; then\
 		curl -L https://github.com/golang-migrate/migrate/releases/download/$(MIGR_VER)/migrate.$(OS)-$(ARCH).tar.gz | tar xvz --wildcards 'migrate';\
 	fi
 	$(MIGRATE) --version
