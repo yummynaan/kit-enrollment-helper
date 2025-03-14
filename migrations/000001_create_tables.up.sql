@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS `users` (
 ) ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS `courses` (
-  `id` VARCHAR(16) NOT NULL,
-  `timetable_id` VARCHAR(16),
+  `id` INT UNSIGNED NOT NULL,
+  `timetable_id` INT UNSIGNED,
   `class` VARCHAR(16),
   `type` VARCHAR(16) NOT NULL,
   `credits` INT NOT NULL,
