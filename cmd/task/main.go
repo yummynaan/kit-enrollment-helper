@@ -4,10 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"strings"
+	"net/url"
 	"time"
 
-	"github.com/gocolly/colly/v2"
+	"github.com/yummynaan/kit-enrollment-helper/internal/app/task"
+	"github.com/yummynaan/kit-enrollment-helper/internal/service"
 )
 
 var (
@@ -34,62 +35,19 @@ func init() {
 }
 
 func main() {
-	c := colly.NewCollector(
-		colly.AllowedDomains(targetDomain),
-		colly.Async(true),
-	)
-
-	c.Limit(&colly.LimitRule{Parallelism: 2})
-
-	c.OnRequest(func(r *colly.Request) {
-		log.Println("visiting", r.URL.String())
-	})
-
-	c.OnHTML("#search_result table.data_list_tbl", func(e *colly.HTMLElement) {
-		scrapeCourse(e)
-	})
-
-	c.OnHTML("p.paging_area a[href]", func(e *colly.HTMLElement) {
-		if strings.Contains(e.Text, "次へ") {
-			href := e.Attr("href")
-			_ = e.Request.Visit(baseURL + href)
-		}
-	})
-
 	param := "?c=search_list&sk=&dc=01" + fmt.Sprintf("&yr=%d&page=%d", year, page)
-	targetURL := baseURL + param
-
-	err := c.Visit(targetURL)
+	targetURL, err := url.Parse(baseURL + param)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 
-	c.Wait()
+	repository, err := service.CreateRepository()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	log.Println("Total time:", time.Since(start))
-}
-
-func scrapeCourse(e *colly.HTMLElement) {
-	e.ForEach("tr", func(i int, row *colly.HTMLElement) {
-		rowData := []string{}
-		row.ForEach("td", func(i int, col *colly.HTMLElement) {
-			data := ""
-			if col.DOM.Find("form > a").Length() > 0 {
-				data = col.DOM.Find("form > a").Contents().First().Text()
-			} else {
-				data = col.DOM.Contents().First().Text()
-			}
-			rowData = append(rowData, data)
-		})
-		for i := 0; i < len(rowData)-1; i++ {
-			if i > 0 {
-				fmt.Print(", ")
-			}
-			fmt.Print(rowData[i])
-		}
-
-		if len(rowData) > 0 {
-			fmt.Println()
-		}
-	})
+	worker := task.NewFetchSyllabusWorker(targetURL, repository)
+	if err := worker.Run(); err != nil {
+		log.Fatal(err)
+	}
 }
