@@ -7,13 +7,6 @@ DB_PORT		:= 3308
 
 init/tools: tbls/install migrate/install
 
-playwright/install:
-	@if [ ! -x "$(command -v playwright)" ]; then\
-		go install github.com/playwright-community/playwright-go/cmd/playwright@latest;\
-		playwright install --with-deps;\
-	fi
-	playwright --version
-
 tbls/install:
 	@if [ ! -x "$(command -v tbls)" ]; then\
 		go install github.com/k1LoW/tbls@latest;\
