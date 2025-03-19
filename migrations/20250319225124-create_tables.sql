@@ -24,17 +24,17 @@ CREATE TABLE IF NOT EXISTS `users` (
 ) ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS `courses` (
-  `id` INT UNSIGNED NOT NULL,
-  `timetable_id` INT UNSIGNED,
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `timetable_id` VARCHAR(16),
+  `title` VARCHAR(64) NOT NULL,
   `class` VARCHAR(16),
   `type` VARCHAR(16) NOT NULL,
   `credits` INT NOT NULL,
   `instructors` VARCHAR(100) NOT NULL,
-  `title` VARCHAR(64) NOT NULL,
-  `year` INT NOT NULL,
+  `year` VARCHAR(16) NOT NULL,
   `semester` VARCHAR(16) NOT NULL,
   `day` VARCHAR(16),
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `courses_idx` (`title`, `class`, `year`, `semester`)
+  UNIQUE INDEX `courses_idx` (`title`, `class`, `year`, `semester`, `day`)
 ) ENGINE = InnoDB;
 -- +migrate Down
