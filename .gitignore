@@ -1,2 +1,5 @@
 migrate
 .env
+
+go_out.txt
+sql_out.txt
