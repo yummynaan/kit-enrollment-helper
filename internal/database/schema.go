@@ -22,13 +22,13 @@ type user struct {
 
 type course struct {
 	ID          int64   `db:"id"`
-	TimetableID *int64  `db:"timetable_id"`
+	TimetableID *string `db:"timetable_id"`
 	Class       *string `db:"class"`
 	Type        string  `db:"type"`
 	Credits     int     `db:"credits"`
 	Instructors string  `db:"instructors"`
 	Title       string  `db:"title"`
-	Year        int     `db:"year"`
+	Year        string  `db:"year"`
 	Semester    string  `db:"semester"`
 	Day         *string `db:"day"`
 }

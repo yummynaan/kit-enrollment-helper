@@ -40,7 +40,7 @@ func NewDatabase() (*Database, error) {
 		password = "root"
 	}
 	if dbname = os.Getenv("DB_NAME"); dbname == "" {
-		dbname = "kit-enrollment-helper"
+		dbname = "kit_enrollment_helper"
 	}
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", username, password, host, port, dbname)
@@ -69,19 +69,22 @@ func (db *Database) BulkInsertCourses(courses model.Courses) (int64, error) {
 		return 0, err
 	}
 
-	cols := []string{"id", "timetable_id", "class", "type", "credits", "title", "year", "semester", "day"}
+	cols := []string{"timetable_id", "title", "class", "type", "credits", "instructors", "year", "semester", "day"}
 	stmt := tx.InsertInto(tableCourses).Columns(cols...)
 	for _, v := range courses {
 		c := course{
-			ID:          v.ID,
 			TimetableID: v.TimetableID,
 			Class:       v.Class,
 			Type:        v.Type,
 			Credits:     v.Credits,
+			Instructors: v.Instructors,
 			Title:       v.Title,
 			Year:        v.Year,
 			Semester:    v.Semester,
 			Day:         v.Day,
+		}
+		if v.TimetableID == nil {
+			c.TimetableID = nil
 		}
 		stmt = stmt.Record(&c)
 	}
