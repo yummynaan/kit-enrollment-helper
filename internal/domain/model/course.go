@@ -10,7 +10,7 @@ type Course struct {
 	Title       string
 	Year        int
 	Semester    string
-	Day         string
+	Day         *string
 }
 
 type Courses []Course

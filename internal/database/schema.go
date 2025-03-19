@@ -30,7 +30,7 @@ type course struct {
 	Title       string  `db:"title"`
 	Year        int     `db:"year"`
 	Semester    string  `db:"semester"`
-	Day         string  `db:"day"`
+	Day         *string `db:"day"`
 }
 
 func (c course) columns() []string {
