@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `courses` (
   `title` VARCHAR(64) NOT NULL,
   `year` INT NOT NULL,
   `semester` VARCHAR(16) NOT NULL,
-  `day` VARCHAR(16) NOT NULL,
+  `day` VARCHAR(16),
   PRIMARY KEY (`id`),
   UNIQUE INDEX `courses_idx` (`title`, `class`, `year`, `semester`)
 ) ENGINE = InnoDB;
