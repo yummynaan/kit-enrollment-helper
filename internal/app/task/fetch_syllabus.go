@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/gocolly/colly/v2"
@@ -24,9 +25,10 @@ func NewFetchSyllabusWorker(targetURL *url.URL, repository domain.Repository) *F
 }
 
 func (w *FetchSyllabusWorker) Run() error {
+	courses := model.Courses{}
 	baseURL := fmt.Sprintf("%s://%s/", w.targetURL.Scheme, w.targetURL.Host)
 
-	// colly, goquery, rodを用いてスクレイピング
+	// colly, goquery用いてスクレイピング
 	c := colly.NewCollector(
 		colly.AllowedDomains(w.targetURL.Host),
 		colly.Async(true),
@@ -39,7 +41,8 @@ func (w *FetchSyllabusWorker) Run() error {
 	})
 
 	c.OnHTML("#search_result table.data_list_tbl", func(e *colly.HTMLElement) {
-		scrapeCourse(e)
+		res := scrapeCourse(e)
+		courses = append(courses, res...)
 	})
 
 	c.OnHTML("p.paging_area a[href]", func(e *colly.HTMLElement) {
@@ -55,6 +58,38 @@ func (w *FetchSyllabusWorker) Run() error {
 	}
 
 	c.Wait()
+
+	// for i, c := range courses {
+	// 	fmt.Printf("%d件目\n", i)
+	// 	if c.TimetableID == nil {
+	// 		fmt.Printf("\t%v\n", nil)
+	// 	} else {
+	// 		fmt.Printf("\t%v\n", *c.TimetableID)
+	// 	}
+	// 	fmt.Printf("\t%v\n", c.Title)
+	// 	if c.Class == nil {
+	// 		fmt.Printf("\t%v\n", nil)
+	// 	} else {
+	// 		fmt.Printf("\t%v\n", *c.Class)
+	// 	}
+	// 	fmt.Printf("\t%v\n", c.Type)
+	// 	fmt.Printf("\t%v\n", c.Credits)
+	// 	fmt.Printf("\t%v\n", c.Instructors)
+	// 	fmt.Printf("\t%v\n", c.Year)
+	// 	fmt.Printf("\t%v\n", c.Semester)
+	// 	if c.Day == nil {
+	// 		fmt.Printf("\t%v\n", nil)
+	// 	} else {
+	// 		fmt.Printf("\t%v\n", *c.Day)
+	// 	}
+	// }
+
+	n, err := w.repository.BulkInsertCourses(courses)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("bulk inserted %d courses\n", n)
 
 	return nil
 }
@@ -89,22 +124,36 @@ func scrapeCourse(e *colly.HTMLElement) model.Courses {
 		var course model.Course
 		timetableID := rowData[0]
 		if timetableID != "-" {
-			fmt.Sscan(timetableID, course.TimetableID)
+			course.TimetableID = &timetableID
 		}
 
 		title := rowData[1]
-		fmt.Sscan(title, &course.Title)
+		course.Title = title
 
 		class := rowData[2]
 		if class != "-" {
-			fmt.Sscan(class, course.Class)
+			course.Class = &class
 		}
 
 		t := rowData[3]
-		fmt.Sscan(t, &course.Type)
+		course.Type = t
 
 		credits := rowData[4]
-		fmt.Sscan(credits, &course.Credits)
+		course.Credits, _ = strconv.Atoi(credits)
+
+		instructors := rowData[5]
+		course.Instructors = instructors
+
+		year := rowData[6]
+		course.Year = year
+
+		semester := rowData[7]
+		course.Semester = semester
+
+		day := rowData[8]
+		if day != "-" {
+			course.Day = &day
+		}
 
 		result = append(result, course)
 	})
