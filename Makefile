@@ -1,8 +1,6 @@
 PWD				:= $(shell pwd)
 OS				:= $(shell uname -s | tr '[:upper:]' '[:lower:]')
 ARCH			:= $(shell uname -m | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/')
-MIGR_VER	:= v4.18.2
-MIGRATE		:= $(PWD)/migrate
 DB_PORT		:= 3308
 
 init/tools: tbls/install sql-migrate/install
@@ -18,9 +16,6 @@ sql-migrate/install: ## install sql-migrate
 		go install github.com/rubenv/sql-migrate/...@latest;\
 	fi
 	sql-migrate --version
-	
-migrate/create:
-	$(MIGRATE) create -ext sql -dir migrations -seq $(FILENAME)
 
 compose/database/init: compose/database/up sleep docker/mysql/migrate
 
