@@ -1,3 +1,5 @@
+
+-- +migrate Up
 CREATE TABLE IF NOT EXISTS `departments` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `faculty` VARCHAR(32) NOT NULL,
@@ -27,9 +29,12 @@ CREATE TABLE IF NOT EXISTS `courses` (
   `class` VARCHAR(16),
   `type` VARCHAR(16) NOT NULL,
   `credits` INT NOT NULL,
+  `instructor` VARCHAR(100) NOT NULL,
   `title` VARCHAR(64) NOT NULL,
   `year` INT NOT NULL,
   `semester` VARCHAR(16) NOT NULL,
   `day` VARCHAR(16) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `courses_idx` (`title`, `class`, `year`, `semester`)
 ) ENGINE = InnoDB;
+-- +migrate Down
