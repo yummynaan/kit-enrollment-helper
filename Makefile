@@ -5,7 +5,7 @@ MIGR_VER	:= v4.18.2
 MIGRATE		:= $(PWD)/migrate
 DB_PORT		:= 3308
 
-init/tools: tbls/install migrate/install
+init/tools: tbls/install sql-migrate/install
 
 tbls/install:
 	@if [ ! -x "$(command -v tbls)" ]; then\
@@ -13,11 +13,11 @@ tbls/install:
 	fi
 	tbls version
 
-migrate/install:
-	@if [ ! -x "$(MIGRATE)" ]; then\
-		curl -L https://github.com/golang-migrate/migrate/releases/download/$(MIGR_VER)/migrate.$(OS)-$(ARCH).tar.gz | tar xvz --wildcards 'migrate';\
+sql-migrate/install: ## install sql-migrate
+	@if [ ! -x "$(command -v sql-migrate)" ]; then\
+		go install github.com/rubenv/sql-migrate/...@latest;\
 	fi
-	$(MIGRATE) --version
+	sql-migrate --version
 	
 migrate/create:
 	$(MIGRATE) create -ext sql -dir migrations -seq $(FILENAME)
