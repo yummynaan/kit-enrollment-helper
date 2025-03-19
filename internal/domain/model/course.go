@@ -6,6 +6,7 @@ type Course struct {
 	Class       *string
 	Type        string
 	Credits     int
+	Instructors string
 	Title       string
 	Year        int
 	Semester    string

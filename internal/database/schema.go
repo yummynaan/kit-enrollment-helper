@@ -26,6 +26,7 @@ type course struct {
 	Class       *string `db:"class"`
 	Type        string  `db:"type"`
 	Credits     int     `db:"credits"`
+	Instructors string  `db:"instructors"`
 	Title       string  `db:"title"`
 	Year        int     `db:"year"`
 	Semester    string  `db:"semester"`
@@ -33,5 +34,5 @@ type course struct {
 }
 
 func (c course) columns() []string {
-	return []string{"id", "timetable_id", "class", "type", "credits", "title", "year", "semester", "day"}
+	return []string{"id", "timetable_id", "class", "type", "credits", "instructors", "title", "year", "semester", "day"}
 }
