@@ -11,7 +11,7 @@ tbls/install:
 	fi
 	tbls version
 
-sql-migrate/install: ## install sql-migrate
+sql-migrate/install:
 	@if [ ! -x "$(command -v sql-migrate)" ]; then\
 		go install github.com/rubenv/sql-migrate/...@latest;\
 	fi
