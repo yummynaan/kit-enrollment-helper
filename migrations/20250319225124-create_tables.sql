@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `courses` (
   `class` VARCHAR(16),
   `type` VARCHAR(16) NOT NULL,
   `credits` INT NOT NULL,
-  `instructors` VARCHAR(100) NOT NULL,
+  `instructors` VARCHAR(256) NOT NULL,
   `year` VARCHAR(16) NOT NULL,
   `semester` VARCHAR(16) NOT NULL,
   `day` VARCHAR(16),
