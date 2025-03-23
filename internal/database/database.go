@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocraft/dbr/v2"
+	"github.com/gocraft/dbr/v2/dialect"
 	"github.com/yummynaan/kit-enrollment-helper/internal/domain/model"
 )
 
@@ -63,32 +65,44 @@ func (db *Database) GetUserByEmail(email string) (model.User, error) {
 	return model.User{}, nil
 }
 
-func (db *Database) BulkInsertCourses(courses model.Courses) (int64, error) {
+func (db *Database) BulkUpsertCourses(courses model.Courses) (int64, error) {
 	tx, err := db.sess.Begin()
 	if err != nil {
 		return 0, err
 	}
 
-	cols := []string{"timetable_id", "title", "class", "type", "credits", "instructors", "year", "semester", "day"}
-	stmt := tx.InsertInto(tableCourses).Columns(cols...)
+	tbl := course{}
+	updateStmt := []string{}
+	for _, v := range tbl.columns() {
+		updateStmt = append(updateStmt, fmt.Sprintf("%s = VALUES(%s)", v, v))
+	}
+
+	stmt := tx.InsertInto(tableCourses).Columns(tbl.columns()...)
 	for _, v := range courses {
 		c := course{
-			TimetableID: v.TimetableID,
-			Class:       v.Class,
-			Type:        v.Type,
-			Credits:     v.Credits,
-			Instructors: v.Instructors,
-			Title:       v.Title,
-			Year:        v.Year,
-			Semester:    v.Semester,
-			Day:         v.Day,
-		}
-		if v.TimetableID == nil {
-			c.TimetableID = nil
+			TimetableID:  v.TimetableID,
+			Class:        v.Class,
+			Type:         v.Type,
+			Credits:      v.Credits,
+			Instructors:  v.Instructors,
+			Title:        v.Title,
+			Year:         v.Year,
+			Semester:     v.Semester,
+			Day:          v.Day,
+			SyllabusYear: v.SyllabusYear,
 		}
 		stmt = stmt.Record(&c)
 	}
-	result, err := stmt.Exec()
+
+	buf := dbr.NewBuffer()
+	if err := stmt.Build(dialect.MySQL, buf); err != nil {
+		return 0, err
+	}
+	stmt = dbr.InsertBySql(" ON DUPLICATE KEY UPDATE " + strings.Join(updateStmt, ","))
+	if err := stmt.Build(dialect.MySQL, buf); err != nil {
+		return 0, err
+	}
+	result, err := tx.InsertBySql(buf.String(), buf.Value()...).Exec()
 	if err != nil {
 		return 0, err
 	}
