@@ -62,15 +62,15 @@ func (w *FetchSyllabusWorker) Run() error {
 
 	c.Wait()
 
-	dump := model.Courses{}
+	tempSlice := model.Courses{}
 	for _, curr := range courses {
 		curr.SyllabusYear = w.syllabusYear
-		if !slices.Contains(dump, curr) {
-			dump = append(dump, curr)
+		if !slices.Contains(tempSlice, curr) {
+			tempSlice = append(tempSlice, curr)
 		}
 	}
 
-	courses = dump
+	courses = tempSlice
 
 	// for i, c := range courses {
 	// 	fmt.Printf("%d件目\n", i)
