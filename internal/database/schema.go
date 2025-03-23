@@ -21,18 +21,19 @@ type user struct {
 }
 
 type course struct {
-	ID          int64   `db:"id"`
-	TimetableID *string `db:"timetable_id"`
-	Class       *string `db:"class"`
-	Type        string  `db:"type"`
-	Credits     int     `db:"credits"`
-	Instructors string  `db:"instructors"`
-	Title       string  `db:"title"`
-	Year        string  `db:"year"`
-	Semester    string  `db:"semester"`
-	Day         *string `db:"day"`
+	ID           int64  `db:"id"`
+	TimetableID  string `db:"timetable_id"`
+	Class        string `db:"class"`
+	Type         string `db:"type"`
+	Credits      int    `db:"credits"`
+	Instructors  string `db:"instructors"`
+	Title        string `db:"title"`
+	Year         string `db:"year"`
+	Semester     string `db:"semester"`
+	Day          string `db:"day"`
+	SyllabusYear int    `db:"syllabus_year"`
 }
 
 func (c course) columns() []string {
-	return []string{"id", "timetable_id", "class", "type", "credits", "instructors", "title", "year", "semester", "day"}
+	return []string{"timetable_id", "title", "class", "type", "credits", "instructors", "year", "semester", "day", "syllabus_year"}
 }
