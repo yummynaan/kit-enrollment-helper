@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -13,20 +14,22 @@ import (
 )
 
 type FetchSyllabusWorker struct {
-	targetURL  *url.URL
-	repository domain.Repository
+	targetURL    *url.URL
+	syllabusYear int
+	repository   domain.Repository
 }
 
-func NewFetchSyllabusWorker(targetURL *url.URL, repository domain.Repository) *FetchSyllabusWorker {
+func NewFetchSyllabusWorker(targetURL *url.URL, syllabusYear int, repository domain.Repository) *FetchSyllabusWorker {
 	return &FetchSyllabusWorker{
-		targetURL:  targetURL,
-		repository: repository,
+		targetURL:    targetURL,
+		syllabusYear: syllabusYear,
+		repository:   repository,
 	}
 }
 
 func (w *FetchSyllabusWorker) Run() error {
 	courses := model.Courses{}
-	baseURL := fmt.Sprintf("%s://%s/", w.targetURL.Scheme, w.targetURL.Host)
+	baseURL := fmt.Sprintf("%s://%s%s", w.targetURL.Scheme, w.targetURL.Host, w.targetURL.Path)
 
 	// colly, goquery用いてスクレイピング
 	c := colly.NewCollector(
@@ -59,37 +62,35 @@ func (w *FetchSyllabusWorker) Run() error {
 
 	c.Wait()
 
+	dump := model.Courses{}
+	for _, curr := range courses {
+		curr.SyllabusYear = w.syllabusYear
+		if !slices.Contains(dump, curr) {
+			dump = append(dump, curr)
+		}
+	}
+
+	courses = dump
+
 	// for i, c := range courses {
 	// 	fmt.Printf("%d件目\n", i)
-	// 	if c.TimetableID == nil {
-	// 		fmt.Printf("\t%v\n", nil)
-	// 	} else {
-	// 		fmt.Printf("\t%v\n", *c.TimetableID)
-	// 	}
+	// 	fmt.Printf("\t%v\n", c.TimetableID)
 	// 	fmt.Printf("\t%v\n", c.Title)
-	// 	if c.Class == nil {
-	// 		fmt.Printf("\t%v\n", nil)
-	// 	} else {
-	// 		fmt.Printf("\t%v\n", *c.Class)
-	// 	}
+	// 	fmt.Printf("\t%v\n", c.Class)
 	// 	fmt.Printf("\t%v\n", c.Type)
 	// 	fmt.Printf("\t%v\n", c.Credits)
 	// 	fmt.Printf("\t%v\n", c.Instructors)
 	// 	fmt.Printf("\t%v\n", c.Year)
 	// 	fmt.Printf("\t%v\n", c.Semester)
-	// 	if c.Day == nil {
-	// 		fmt.Printf("\t%v\n", nil)
-	// 	} else {
-	// 		fmt.Printf("\t%v\n", *c.Day)
-	// 	}
+	// 	fmt.Printf("\t%v\n", c.Day)
 	// }
 
-	n, err := w.repository.BulkInsertCourses(courses)
+	n, err := w.repository.BulkUpsertCourses(courses)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("bulk inserted %d courses\n", n)
+	log.Printf("bulk upserted %d courses\n", n)
 
 	return nil
 }
@@ -123,17 +124,13 @@ func scrapeCourse(e *colly.HTMLElement) model.Courses {
 
 		var course model.Course
 		timetableID := rowData[0]
-		if timetableID != "-" {
-			course.TimetableID = &timetableID
-		}
+		course.TimetableID = timetableID
 
 		title := rowData[1]
 		course.Title = title
 
 		class := rowData[2]
-		if class != "-" {
-			course.Class = &class
-		}
+		course.Class = class
 
 		t := rowData[3]
 		course.Type = t
@@ -151,9 +148,7 @@ func scrapeCourse(e *colly.HTMLElement) model.Courses {
 		course.Semester = semester
 
 		day := rowData[8]
-		if day != "-" {
-			course.Day = &day
-		}
+		course.Day = day
 
 		result = append(result, course)
 	})
