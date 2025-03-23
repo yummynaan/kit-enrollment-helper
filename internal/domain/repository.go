@@ -7,5 +7,5 @@ import (
 type Repository interface {
 	CreateUser(user model.User) error
 	GetUserByEmail(email string) (model.User, error)
-	BulkInsertCourses(courses model.Courses) (int64, error)
+	BulkUpsertCourses(courses model.Courses) (int64, error)
 }
