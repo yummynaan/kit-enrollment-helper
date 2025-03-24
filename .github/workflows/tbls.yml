@@ -26,3 +26,10 @@ jobs:
 
       - name: Run tbls
         run: tbls doc
+
+      - name: Commit and Push if Changes Exist
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add doc/schema
+          git diff --cached --quiet || (git commit -m "Update DB Schema Docs" && git push)
