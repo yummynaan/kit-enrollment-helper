@@ -1,0 +1,16 @@
+name: Generate DB Docs
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - uses: k1low/setup-tbls@v1
+      - name: Run tbls
+        run: tbls doc
