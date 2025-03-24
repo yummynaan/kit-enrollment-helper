@@ -18,15 +18,11 @@ jobs:
         with:
           go-version: "1.23"
 
-      - name: Set up sql-migrate
-        run: |
-          go install github.com/rubenv/sql-migrate/...@latest
+      - name: Set up tools
+        run: make init/tools
 
-      - name: Init DB
+      - name: Set up DB
         run: make database/init
-
-      - name: Set up tbls
-        uses: k1low/setup-tbls@v1
 
       - name: Run tbls
         run: tbls doc
