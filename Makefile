@@ -18,7 +18,7 @@ sql-migrate/install:
 	sql-migrate --version
 
 database/init: database/up sleep docker/mysql/migrate
-	- mysql -h 127.0.0.1 -P 3308 -uroot -proot kit_enrollment_helper < seeds/seed.sql
+	- mysql -h 127.0.0.1 -P $(DB_PORT) -uroot -proot kit_enrollment_helper < seeds/seed.sql
 
 database/up:
 	docker compose up -d
